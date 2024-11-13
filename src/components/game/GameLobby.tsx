@@ -4,118 +4,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlayerAvatar } from '@/components/shared/PlayerAvatar';
+import { Copy, Check } from 'lucide-react';
 import { gameStorage, type GameSession } from '@/lib/storage';
 
 export function GameLobby() {
-  const router = useRouter();
-  const [games, setGames] = useState<GameSession[]>([]);
-  const [showNewGame, setShowNewGame] = useState(false);
-  const [showJoinGame, setShowJoinGame] = useState(false);
-  const [gameName, setGameName] = useState('');
-  const [gameCode, setGameCode] = useState('');
-  const [playerName, setPlayerName] = useState('');
+  // ... previous state variables ...
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Load active games on mount and every 5 seconds
-    loadGames();
-    const interval = setInterval(loadGames, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // ... previous useEffect and functions ...
 
-  const loadGames = () => {
-    const activeGames = gameStorage.getActiveGames();
-    setGames(activeGames);
-  };
-
-  const createGame = () => {
-    if (!gameName.trim() || !playerName.trim()) return;
-    
-    const game = gameStorage.createGame(gameName);
-    const player = gameStorage.addPlayer(game.id, playerName);
-    
-    if (player) {
-      router.push(`/game/${game.id}`);
-    }
-  };
-
-  const joinGame = () => {
-    if (!gameCode.trim() || !playerName.trim()) return;
-    
-    const game = gameStorage.getActiveGames().find(g => g.code === gameCode.toUpperCase());
-    if (game) {
-      const player = gameStorage.addPlayer(game.id, playerName);
-      if (player) {
-        router.push(`/game/${game.id}`);
-      }
-    }
+  const copyGameCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
   };
 
   return (
     <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>1-4-24 Dice Game</CardTitle>
-          <div className="space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowNewGame(true);
-                setShowJoinGame(false);
-              }}
-            >
-              Create Game
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowJoinGame(true);
-                setShowNewGame(false);
-              }}
-            >
-              Join Game
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
+      {/* ... previous CardHeader ... */}
       
       <CardContent>
-        {showNewGame && (
-          <div className="space-y-4 mb-6">
-            <h3 className="text-lg font-semibold">Create New Game</h3>
-            <div className="space-y-2">
-              <Input
-                placeholder="Game Name"
-                value={gameName}
-                onChange={(e) => setGameName(e.target.value)}
-              />
-              <Input
-                placeholder="Your Name"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-              />
-              <Button onClick={createGame}>Create</Button>
-            </div>
-          </div>
-        )}
-
-        {showJoinGame && (
-          <div className="space-y-4 mb-6">
-            <h3 className="text-lg font-semibold">Join Game</h3>
-            <div className="space-y-2">
-              <Input
-                placeholder="Game Code"
-                value={gameCode}
-                onChange={(e) => setGameCode(e.target.value.toUpperCase())}
-              />
-              <Input
-                placeholder="Your Name"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-              />
-              <Button onClick={joinGame}>Join</Button>
-            </div>
-          </div>
-        )}
+        {/* ... previous create/join game forms ... */}
 
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Active Games</h2>
@@ -130,7 +39,21 @@ export function GameLobby() {
                 >
                   <div>
                     <h3 className="font-semibold">{game.name}</h3>
-                    <p className="text-sm text-gray-500">Code: {game.code}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-500">Code: {game.code}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => copyGameCode(game.code)}
+                      >
+                        {copiedCode === game.code ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
