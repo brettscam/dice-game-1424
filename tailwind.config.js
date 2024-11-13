@@ -1,5 +1,3 @@
-
-```javascript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -56,4 +54,3 @@ module.exports = {
   },
   plugins: [],
 }
-```
